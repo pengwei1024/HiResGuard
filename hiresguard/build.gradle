@@ -1,0 +1,25 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile 'com.google.gradle:osdetector-gradle-plugin:1.2.1'
+    compile 'com.tencent.mm:AndResGuard-core:1.1.9'
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+group='com.apkfuns.hiresguard'
+version='1.0.1'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri('../repo'))
+        }
+    }
+}
