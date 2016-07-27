@@ -14,7 +14,7 @@ repositories {
 }
 
 group='com.apkfuns.hiresguard'
-version='1.0.1'
+version='1.0.0'
 
 uploadArchives {
     repositories {
@@ -23,3 +23,5 @@ uploadArchives {
         }
     }
 }
+
+apply from: './bintray.gradle'

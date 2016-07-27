@@ -4,6 +4,12 @@ import com.tencent.mm.resourceproguard.InputParam
 import com.tencent.mm.resourceproguard.Main;
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.Task
+import org.gradle.api.execution.TaskActionListener
+import org.gradle.api.internal.tasks.TaskExecuter
+import org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction;
 
@@ -11,8 +17,8 @@ import org.gradle.api.tasks.TaskAction;
  * Created by pengwei on 16/7/26.
  */
 public class HiResGuardTask extends DefaultTask {
-    def HiResGuardExtension configuration
-    def android
+    private HiResGuardExtension configuration
+    private android
     @Optional
     def output
     @Optional
@@ -20,7 +26,7 @@ public class HiResGuardTask extends DefaultTask {
 
     HiResGuardTask() {
         description = 'Assemble Resource Proguard APK'
-        group = 'hiresguard'
+        group = 'hiResGuard'
         outputs.upToDateWhen { false }
         configuration = project.resGuardOption
         android = project.extensions.android
@@ -28,6 +34,10 @@ public class HiResGuardTask extends DefaultTask {
 
     @TaskAction
     def resGuard() {
+        if (output == null || variant == null) {
+            return
+        }
+        println("#start HiResGuardTask# variant=${variant.name},output=${output.outputFile}")
         def String absPath = output.outputFile.getAbsolutePath()
         def signConfig = variant.apkVariantData.variantConfiguration.signingConfig
         def String packageName = variant.apkVariantData.variantConfiguration.applicationId
@@ -49,7 +59,7 @@ public class HiResGuardTask extends DefaultTask {
                 .setCompressFilePattern(configuration.compressFilePattern)
                 .setZipAlign(getZipAlignPath())
                 .setSevenZipPath(sevenZip.path)
-                .setOutBuilder(useFolder(output.outputFile))
+                .setOutBuilder(getOutputFileName(output.outputFile))
                 .setApkPath(absPath)
                 .setUseSign(configuration.useSign);
         if (configuration.useSign) {
@@ -62,16 +72,30 @@ public class HiResGuardTask extends DefaultTask {
                     .setStorepass(signConfig.storePassword)
         }
         Main.gradleRun(builder.create())
-        println("123*********************************")
+        println("#end HiResGuardTask#")
     }
 
-    static def useFolder(file) {
-        //remove .apk from filename
+    def getOutputFileName(file) {
         def fileName = file.name[0..-5]
-        return "${file.parent}/AndResGuard123_${fileName}/"
+        return "${file.parent}/resGuard_${fileName}/"
     }
 
     def getZipAlignPath() {
         return "${android.getSdkDirectory().getAbsolutePath()}/build-tools/${android.buildToolsVersion}/zipalign"
+    }
+
+    @Override
+    TaskExecuter getExecuter() {
+        return new ExecuteActionsTaskExecuter(new TaskActionListener() {
+            @Override
+            void beforeActions(Task task) {
+
+            }
+
+            @Override
+            void afterActions(Task task) {
+
+            }
+        });
     }
 }

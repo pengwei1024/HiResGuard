@@ -1,3 +1,4 @@
+
 apply plugin: 'com.android.application'
 apply plugin: 'HiResGuardPlugin'
 
@@ -18,17 +19,36 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
 
+    signingConfigs {
+        release {
+            try {
+                storeFile file("../keystore/release.keystore")
+                storePassword "testres"
+                keyAlias "testres"
+                keyPassword "testres"
+            } catch (ex) {
+                throw new InvalidUserDataException(ex.toString())
+            }
+        }
+
+        debug {
+            storeFile file("../keystore/debug.keystore")
+        }
+    }
+
     defaultConfig {
         applicationId "com.apkfuns.hiresguard.sample"
         minSdkVersion 8
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
+        project.archivesBaseName = "HiResGuard"
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
@@ -39,10 +59,11 @@ android {
                     from output.outputFile
                     into "$projectDir/dest"
                 }
-                println("*************** 执行resGuard **************")
-                resGuardTask.output = output
-                resGuardTask.variant = variant
-                resGuardTask.execute()
+                if (useResGuard.toBoolean()) {
+                    resGuardTask.output = output
+                    resGuardTask.variant = variant
+                    resGuardTask.execute()
+                }
             }
         }
 
@@ -57,8 +78,8 @@ dependencies {
 
 resGuardOption {
     mappingFile = null
-    use7zip = false
-    useSign = false
+    use7zip = true
+    useSign = true
     keepRoot = false
     whiteList = [
             "R.drawable.ic_launcher",
@@ -78,3 +99,4 @@ resGuardOption {
         //path = "/usr/local/bin/7za"
     }
 }
+
