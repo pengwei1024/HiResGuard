@@ -63,6 +63,12 @@ android {
                     resGuardTask.output = output
                     resGuardTask.variant = variant
                     resGuardTask.execute()
+                    def fileName = output.outputFile.name[0..-5]
+                    copy {
+                        from "${output.outputFile.parent}/resGuard_${fileName}"
+                        include "resource_mapping_${fileName}.txt", "${fileName}_signed_7zip.apk"
+                        into "$projectDir/dest/${variant.name}"
+                    }
                 }
             }
         }

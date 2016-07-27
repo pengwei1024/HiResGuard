@@ -1,7 +1,12 @@
 # HiResGuard
 基于[AndResGuard](https://github.com/shwenzhang/AndResGuard)定制, 让适用于更多的场景
 
+### 和AndResGuard区别
+基于AndResGuard-core开发，自定义task实现参数自定义，不需要通过执行task来执行，android studio的直接运行也可以执行，
+且不会多次编译运行(resguard依赖assemble，且只能压缩release版本)
+
 ### 使用方法
+使用方法基本和AndResGuard一致，但注意gradle插件`HiResGuardPlugin`不一样，配置项`resGuardOption`也不一样。
 ```groovy
 apply plugin: 'HiResGuardPlugin'
 
@@ -40,16 +45,24 @@ resGuardOption {
 }
 
 // 使用方法
-applicationVariants.all { variant ->
-        variant.assemble.doLast {
-            variant.outputs.each { output ->
-                resGuardTask.output = output
-                resGuardTask.variant = variant
-                resGuardTask.execute()
+android {
+    applicationVariants.all { variant ->
+            variant.assemble.doLast {
+                variant.outputs.each { output ->
+                    resGuardTask.output = output
+                    resGuardTask.variant = variant
+                    resGuardTask.execute()
+                }
             }
-        }
+    
+        }  
+}
+```
 
-    }
+### 本地调试
+上传到本地maven
+```
+./gradlew hiresguard:uploadArchives
 ```
 
 
